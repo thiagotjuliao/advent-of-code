@@ -4,7 +4,7 @@ import aoc.Solution
 
 /** https://adventofcode.com/2018/day/15
   *
-  * To solve it, override the parts:
-  *   override def part1(in: aoc.Input): Any = in.lines.size
+  * To solve it, register the parts:
+  *   part1 { in => in.lines.size }
   */
 object Day15 extends Solution(2018, 15)

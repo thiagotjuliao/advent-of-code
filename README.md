@@ -9,7 +9,7 @@ maintain) and inputs downloaded on demand.
 
 ```bash
 cp .env.example .env     # and paste your adventofcode.com session cookie
-sbt test                 # compiles everything and runs the example suites
+sbt test                 # compiles everything and runs the core suite
 sbt "run list"           # shows what is implemented so far
 ```
 
@@ -38,17 +38,22 @@ That creates `src/main/scala/aoc/y2024/Day07.scala`, its test at
 `src/test/scala/aoc/y2024/Day07Suite.scala`, and downloads
 `inputs/2024/day07.txt`.
 
-The file starts as a stub (`object Day07 extends Solution(2024, 7)`); just
-override the parts:
+The file starts as a stub (`object Day07 extends Solution(2024, 7)`); register
+the parts to solve it:
 
 ```scala
 object Day07 extends Solution(2024, 7):
-  override def part1(in: Input): Any = in.lines.size
-  override def part2(in: Input): Any = in.ints.sum
+  part1 { in => in.lines.size }          // Int
+  part2 { in => in.words.mkString(",") } // String
 ```
 
+Each closure is type-checked where it is written and its result type is
+inferred — no solution ever names `Any`. The type is only erased at the very
+edge, in `Solution.solve`, because all the runner does with an answer is print
+it, and one day's part returns an `Int` where the next returns a `String`.
+
 The runner picks the new day up on its own — there is no registry to update.
-A day that overrides nothing stays marked as unimplemented and is skipped by
+A day that registers nothing stays marked as unimplemented and is skipped by
 `run <year>` and `run all`.
 
 Once the AoC 2026 is out: `./scripts/scaffold-year.sh 2026`, then add the year
@@ -98,7 +103,7 @@ scripts/
   finish-day.sh               verifies, commits, tags and pushes a day
 inputs/YYYY/dayDD.txt         inputs (git-ignored on purpose)
 src/main/scala/aoc/
-  Solution.scala              base class (year, day, part1, part2)
+  Solution.scala              base class: registers and runs a day's parts
   Input.scala                 the puzzle text, parsed N ways
   Solutions.scala             discovery by reflection
   AocInput.scala              disk reads + cached downloads
@@ -136,12 +141,13 @@ Better Comments.
 ## Tests
 
 The examples from the puzzle text become tests, with
-[munit](https://scalameta.org/munit/):
+[munit](https://scalameta.org/munit/). `solve(part, input)` is how a test runs
+a registered part:
 
 ```scala
 class Day01Suite extends FunSuite:
   test("part 1: the examples from the puzzle text") {
-    assertEquals(Day01.part1(Input("(())")), 0)
+    assertEquals(Day01.solve(1, Input("(())")), 0)
   }
 ```
 

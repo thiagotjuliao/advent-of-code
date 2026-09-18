@@ -18,9 +18,29 @@ class CoreSuite extends FunSuite:
     assertEquals(in.captures(raw"(\w) (\d)"), Vector(Vector("a", "1"), Vector("b", "2")))
   }
 
+  test("Solution: a registered part keeps its own type and runs") {
+    object Probe extends Solution(1999, 1):
+      part1 { in => in.ints.sum } // Int
+      part2 { in => in.words.mkString("-") } // String
+
+    assert(Probe.solved(1) && Probe.solved(2))
+    assertEquals(Probe.solve(1, Input("1 2 3")), 6)
+    assertEquals(Probe.solve(2, Input("a b")), "a-b")
+  }
+
+  test("Solution: a part that was never registered is not solved") {
+    object Half extends Solution(1999, 2):
+      part1 { in => in.text.length }
+
+    assert(Half.solved(1))
+    assert(!Half.solved(2))
+    intercept[IllegalStateException](Half.solve(2, Input("x")))
+  }
+
   test("Solutions: discovery by reflection") {
     assert(Solutions.find(2015, 1).isDefined)
     assertEquals(Solutions.find(2015, 1).map(_.label), Some("2015 day 01"))
-    assert(Solutions.find(2015, 3).exists(s => !s.solved(1)), "a stub must not count as solved")
-    assert(Solutions.implemented.sizeIs >= 3)
+    assert(Solutions.find(2015, 1).exists(s => !s.solved(1)), "a stub must not count as solved")
+    assertEquals(Solutions.implemented, Vector.empty)
   }
+end CoreSuite

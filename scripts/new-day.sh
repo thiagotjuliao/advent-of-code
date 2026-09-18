@@ -31,8 +31,8 @@ import aoc.Solution
 
 /** https://adventofcode.com/$YEAR/day/$DAY
   *
-  * To solve it, override the parts:
-  *   override def part1(in: aoc.Input): Any = in.lines.size
+  * To solve it, register the parts:
+  *   part1 { in => in.lines.size }
   */
 object Day$DD extends Solution($YEAR, $DAY)
 EOF
@@ -54,11 +54,11 @@ class Day${DD}Suite extends FunSuite:
   """.stripMargin.trim)
 
   test("part 1".ignore) {
-    assertEquals(Day$DD.part1(sample), ???)
+    assertEquals(Day$DD.solve(1, sample), ???)
   }
 
   test("part 2".ignore) {
-    assertEquals(Day$DD.part2(sample), ???)
+    assertEquals(Day$DD.solve(2, sample), ???)
   }
 EOF
   echo "created: ${TEST#"$ROOT/"}"

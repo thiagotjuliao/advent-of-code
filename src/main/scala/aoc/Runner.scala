@@ -63,19 +63,15 @@ object Runner:
         println(s"  ${Console.YELLOW}no input: $error${Console.RESET}")
         0.0
       case Right(input) =>
-        val parts = Seq[(Int, Input => Any)](
-          1 -> (in => solution.part1(in)),
-          2 -> (in => solution.part2(in))
-        )
-        parts.map((part, compute) => runPart(solution, part, compute, input)).sum
+        Seq(1, 2).map(part => runPart(solution, part, input)).sum
 
-  private def runPart(solution: Solution, part: Int, compute: Input => Any, input: Input): Double =
+  private def runPart(solution: Solution, part: Int, input: Input): Double =
     if !solution.solved(part) then
       println(s"  part $part: —")
       0.0
     else
       val started = System.nanoTime()
-      val outcome = Try(compute(input))
+      val outcome = Try(solution.solve(part, input))
       val millis = (System.nanoTime() - started) / 1e6
       outcome match
         case Success(value) =>
@@ -97,11 +93,7 @@ object Runner:
         Left(s"${solution.label}: part ${if solution.solved(1) then 2 else 1} is not implemented")
       case Some(solution) =>
         AocInput.load(year, day).flatMap { input =>
-          val parts = Seq[(Int, Input => Any)](
-            1 -> (in => solution.part1(in)),
-            2 -> (in => solution.part2(in))
-          )
-          val outcomes = parts.map((part, compute) => part -> Try(compute(input)))
+          val outcomes = Seq(1, 2).map(part => part -> Try(solution.solve(part, input)))
           outcomes
             .collectFirst { case (part, Failure(e)) =>
               s"${solution.label}: part $part blew up — ${e.getClass.getSimpleName}: ${e.getMessage}"
