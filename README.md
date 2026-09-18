@@ -22,6 +22,7 @@ sbt "run list"           # mostra o que já está implementado
 | `sbt "run all"` | roda tudo |
 | `sbt run` | em dezembro, roda o puzzle de hoje |
 | `sbt "run list"` | lista o que está implementado |
+| `sbt "run check 2015 1"` | roda as duas partes e sai com erro se faltar alguma |
 | `sbt "testOnly aoc.y2015.Day01Suite"` | roda o teste de um dia |
 
 Cada parte sai com o tempo de execução ao lado — útil para saber quando a
@@ -52,6 +53,35 @@ por `run <ano>` e `run all`.
 Quando sair o AoC 2026: `./scripts/scaffold-year.sh 2026` e acrescente o ano em
 `Solutions.years`.
 
+## Fechando um dia
+
+Quando as duas partes já valeram estrela:
+
+```bash
+./scripts/finish-day.sh 2015 1
+```
+
+O script se recusa a fechar dia pela metade. Antes de encostar no git ele roda
+`scalafmtCheckAll`, a suíte inteira e `run check <ano> <dia>` — que executa as
+duas partes contra o seu input de verdade. Qualquer coisa falhando, não há
+commit nem tag.
+
+Passando, ele commita a solução (e o teste) e cria uma **tag anotada**:
+
+| | |
+| --- | --- |
+| tag | `y2015-d01` |
+| assunto da tag | `AoC 2015 dia 01 — Not Quite Lisp` |
+| commit | `2015 dia 01 — Not Quite Lisp` |
+
+O título sai do scaladoc do próprio arquivo (`/** https://adventofcode.com/... — Título */`);
+`-t "Outro título"` sobrescreve. Outras opções: `--all` (inclui no commit o que
+mais estiver modificado), `--no-push`, `--no-verify`.
+
+Por fim ele dá `git push --follow-tags`, levando commit e tag juntos.
+
+Para ver o placar: `git tag -l 'y2015*'`.
+
 ## Estrutura
 
 ```
@@ -63,6 +93,7 @@ scripts/
   new-day.sh                  cria solução + teste + input de um dia
   fetch-input.sh              baixa só o input
   scaffold-year.sh            cria os 25 stubs de um ano novo
+  finish-day.sh               verifica, commita, tagueia e faz push de um dia
 inputs/YYYY/dayDD.txt         inputs (git-ignorados de propósito)
 src/main/scala/aoc/
   Solution.scala              classe base (year, day, part1, part2)

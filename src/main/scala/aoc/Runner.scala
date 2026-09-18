@@ -24,6 +24,7 @@ object Runner:
       case ("list" | "--list" | "-l") :: _ => list()
       case ("help" | "--help" | "-h") :: _ => usage()
       case "all" :: _ => runMany(Solutions.implemented)
+      case "check" :: year :: day :: _ => withInt(year, day)(check)
       case year :: Nil => withInt(year)(y => runMany(Solutions.implementedOfYear(y)))
       case year :: day :: _ => withInt(year, day)((y, d) => runOne(y, d))
 
@@ -85,6 +86,39 @@ object Runner:
           println(s"  parte $part: ${Console.RED}$what${Console.RESET}")
       millis
 
+  /** Modo usado pelo `finish-day.sh`: roda as duas partes e sai com codigo 1
+    * se qualquer uma faltar, estourar ou ficar sem input. Nada de tag em dia
+    * meio resolvido.
+    */
+  private def check(year: Int, day: Int): Unit =
+    val verdict = Solutions.find(year, day) match
+      case None =>
+        Left(s"nao existe aoc.y$year.Day${f"$day%02d"}")
+      case Some(solution) if !solution.solved(1) || !solution.solved(2) =>
+        Left(s"${solution.label}: falta implementar a parte ${if solution.solved(1) then 2 else 1}")
+      case Some(solution) =>
+        AocInput.load(year, day).flatMap { input =>
+          val parts = Seq[(Int, Input => Any)](
+            1 -> (in => solution.part1(in)),
+            2 -> (in => solution.part2(in))
+          )
+          val outcomes = parts.map((part, compute) => part -> Try(compute(input)))
+          outcomes
+            .collectFirst { case (part, Failure(e)) =>
+              s"${solution.label}: parte $part estourou — ${e.getClass.getSimpleName}: ${e.getMessage}"
+            }
+            .toLeft(outcomes.collect { case (part, Success(v)) => part -> v })
+        }
+
+    verdict match
+      case Right(answers) =>
+        answers.foreach((part, value) => println(f"  parte $part: $value"))
+        println(s"${Console.GREEN}ok: $year dia ${f"$day%02d"} completo${Console.RESET}")
+      case Left(reason) =>
+        println(s"${Console.RED}falhou: $reason${Console.RESET}")
+        sys.exit(1)
+  end check
+
   private def list(): Unit =
     val done = Solutions.implemented
     if done.isEmpty then println("Nenhuma solucao implementada ainda.")
@@ -106,6 +140,7 @@ object Runner:
       |  <ano>          roda o ano inteiro     ex: sbt "run 2024"
       |  all            roda tudo
       |  list           lista o que esta implementado
+      |  check <ano> <dia>  verifica as duas partes e sai com erro se faltar algo
       |""".stripMargin.trim)
 
   private def withInt(s: String)(f: Int => Unit): Unit =
