@@ -20,12 +20,12 @@ object Runner:
 
   def main(args: Array[String]): Unit =
     args.toList match
-      case Nil                                 => runToday()
-      case ("list" | "--list" | "-l") :: _     => list()
-      case ("help" | "--help" | "-h") :: _     => usage()
-      case "all" :: _                          => runMany(Solutions.implemented)
-      case year :: Nil                         => withInt(year)(y => runMany(Solutions.implementedOfYear(y)))
-      case year :: day :: _                    => withInt(year, day)((y, d) => runOne(y, d))
+      case Nil => runToday()
+      case ("list" | "--list" | "-l") :: _ => list()
+      case ("help" | "--help" | "-h") :: _ => usage()
+      case "all" :: _ => runMany(Solutions.implemented)
+      case year :: Nil => withInt(year)(y => runMany(Solutions.implementedOfYear(y)))
+      case year :: day :: _ => withInt(year, day)((y, d) => runOne(y, d))
 
   private def runToday(): Unit =
     val today = LocalDate.now(AocZone)
@@ -39,10 +39,14 @@ object Runner:
   private def runOne(year: Int, day: Int): Unit =
     Solutions.find(year, day) match
       case None =>
-        println(s"Nao existe aoc.y$year.Day${f"$day%02d"} — crie com: ./scripts/new-day.sh $year $day")
+        println(
+          s"Nao existe aoc.y$year.Day${f"$day%02d"} — crie com: ./scripts/new-day.sh $year $day"
+        )
       case Some(solution) if !Solutions.isImplemented(solution) =>
-        println(s"${solution.label}: ainda e um stub — implemente em " +
-          f"src/main/scala/aoc/y$year%04d/Day$day%02d.scala")
+        println(
+          s"${solution.label}: ainda e um stub — implemente em " +
+            f"src/main/scala/aoc/y$year%04d/Day$day%02d.scala"
+        )
       case Some(solution) => run(solution)
 
   private def runMany(solutions: Seq[Solution]): Unit =
@@ -71,7 +75,7 @@ object Runner:
     else
       val started = System.nanoTime()
       val outcome = Try(compute(input))
-      val millis  = (System.nanoTime() - started) / 1e6
+      val millis = (System.nanoTime() - started) / 1e6
       outcome match
         case Success(value) =>
           val padded = String.format("%-26s", String.valueOf(value))
@@ -110,4 +114,5 @@ object Runner:
   private def withInt(a: String, b: String)(f: (Int, Int) => Unit): Unit =
     (a.toIntOption, b.toIntOption) match
       case (Some(x), Some(y)) => f(x, y)
-      case _                  => println(s"argumentos invalidos: $a $b"); usage()
+      case _ => println(s"argumentos invalidos: $a $b"); usage()
+end Runner

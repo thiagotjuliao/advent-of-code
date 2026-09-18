@@ -15,14 +15,14 @@ object Search:
     bfsAll(Seq(start))(next)
 
   def bfsAll[S](starts: IterableOnce[S])(next: S => IterableOnce[S]): Map[S, Int] =
-    val dist  = mutable.HashMap.empty[S, Int]
+    val dist = mutable.HashMap.empty[S, Int]
     val queue = mutable.Queue.empty[S]
     starts.iterator.foreach { s =>
       if dist.put(s, 0).isEmpty then queue.enqueue(s)
     }
     while queue.nonEmpty do
       val cur = queue.dequeue()
-      val d   = dist(cur) + 1
+      val d = dist(cur) + 1
       next(cur).iterator.foreach { n =>
         if dist.put(n, d).isEmpty then queue.enqueue(n)
       }
@@ -33,8 +33,8 @@ object Search:
     */
   def bfsPath[S](start: S, goal: S => Boolean)(next: S => IterableOnce[S]): Option[Vector[S]] =
     val parent = mutable.HashMap[S, Option[S]](start -> None)
-    val queue  = mutable.Queue(start)
-    var found  = Option.empty[S]
+    val queue = mutable.Queue(start)
+    var found = Option.empty[S]
     while queue.nonEmpty && found.isEmpty do
       val cur = queue.dequeue()
       if goal(cur) then found = Some(cur)
@@ -53,7 +53,7 @@ object Search:
 
   /** Dijkstra: custos minimos de `start`. `next` devolve (vizinho, custo do passo). */
   def dijkstra[S](start: S)(next: S => IterableOnce[(S, Long)]): Map[S, Long] =
-    val best  = mutable.HashMap(start -> 0L)
+    val best = mutable.HashMap(start -> 0L)
     val queue = mutable.PriorityQueue(0L -> start)(using minHeap[S])
     while queue.nonEmpty do
       val (cost, cur) = queue.dequeue()
@@ -67,8 +67,10 @@ object Search:
     best.toMap
 
   /** Dijkstra que para assim que alcanca o objetivo. */
-  def dijkstraTo[S](start: S, goal: S => Boolean)(next: S => IterableOnce[(S, Long)]): Option[Long] =
-    val best  = mutable.HashMap(start -> 0L)
+  def dijkstraTo[S](start: S, goal: S => Boolean)(
+      next: S => IterableOnce[(S, Long)]
+  ): Option[Long] =
+    val best = mutable.HashMap(start -> 0L)
     val queue = mutable.PriorityQueue(0L -> start)(using minHeap[S])
     var answer = Option.empty[Long]
     while queue.nonEmpty && answer.isEmpty do
@@ -82,3 +84,4 @@ object Search:
             queue.enqueue(candidate -> n)
         }
     answer
+end Search

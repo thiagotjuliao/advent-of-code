@@ -1,6 +1,6 @@
 ThisBuild / scalaVersion := "3.9.0"
 ThisBuild / organization := "dev.thiagojuliao"
-ThisBuild / version      := "0.1.0"
+ThisBuild / version := "0.1.0"
 
 lazy val root = project
   .in(file("."))
@@ -15,8 +15,8 @@ lazy val root = project
     libraryDependencies += "org.scalameta" %% "munit" % "1.3.6" % Test,
     testFrameworks += new TestFramework("munit.Framework"),
     Compile / mainClass := Some("aoc.Runner"),
-    run / fork          := true,
-    run / connectInput  := true,
+    run / fork := true,
+    run / connectInput := true,
     // AoC adora recursao profunda e grids grandes
     run / javaOptions ++= Seq("-Xss512m", "-Xmx4g")
   )

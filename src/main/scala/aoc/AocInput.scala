@@ -21,8 +21,7 @@ object AocInput:
   /** Le do disco; se nao existir e houver `AOC_SESSION`, baixa e salva. */
   def load(year: Int, day: Int): Either[String, Input] =
     val file = path(year, day)
-    if Files.exists(file) && Files.size(file) > 0 then
-      Right(Input(Files.readString(file)))
+    if Files.exists(file) && Files.size(file) > 0 then Right(Input(Files.readString(file)))
     else
       download(year, day).map { body =>
         Files.createDirectories(file.getParent)
@@ -51,7 +50,7 @@ object AocInput:
             case 200 => Right(response.body)
             case 400 => Left("HTTP 400: cookie de sessao invalido ou expirado — renove AOC_SESSION")
             case 404 => Left(s"HTTP 404: o puzzle $year/$day ainda nao foi liberado")
-            case c   => Left(s"HTTP $c ao baixar o input de $year/$day")
+            case c => Left(s"HTTP $c ao baixar o input de $year/$day")
         catch case e: Exception => Left(s"falha de rede: ${e.getMessage}")
 
   private lazy val client: HttpClient =
@@ -75,3 +74,4 @@ object AocInput:
           k.trim -> v.trim.stripPrefix("\"").stripSuffix("\"")
         }
         .toMap
+end AocInput

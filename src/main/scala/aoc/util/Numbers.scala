@@ -18,18 +18,19 @@ object Numbers:
       val p = BigInt(product / mod)
       acc + BigInt(rem) * p.modInverse(BigInt(mod)) * p
     }
-    (total.mod(BigInt(product))).toLong
+    total.mod(BigInt(product)).toLong
 
   /** Detecta ciclo em `f` a partir de `start`: (indice do inicio, tamanho do ciclo). */
   def findCycle[S](start: S)(f: S => S): (Int, Int) =
     val seen = scala.collection.mutable.HashMap(start -> 0)
-    var cur  = start
-    var i    = 0
+    var cur = start
+    var i = 0
     var result = Option.empty[(Int, Int)]
     while result.isEmpty do
       cur = f(cur)
       i += 1
       seen.get(cur) match
         case Some(first) => result = Some(first -> (i - first))
-        case None        => seen(cur) = i
+        case None => seen(cur) = i
     result.get
+end Numbers

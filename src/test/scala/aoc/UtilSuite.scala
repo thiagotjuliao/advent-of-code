@@ -48,3 +48,4 @@ class UtilSuite extends FunSuite:
     assert(Solutions.find(2015, 3).exists(s => !s.solved(1)), "stub nao pode contar como resolvido")
     assert(Solutions.implemented.sizeIs >= 3)
   }
+end UtilSuite

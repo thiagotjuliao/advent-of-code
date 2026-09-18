@@ -56,6 +56,9 @@ Quando sair o AoC 2026: `./scripts/scaffold-year.sh 2026` e acrescente o ano em
 
 ```
 build.sbt                     sbt 2.0.8, Scala 3.9.0, munit
+project/plugins.sbt           sbt-scalafmt
+.scalafmt.conf                contrato de formatação (o mesmo dos outros repos Scala)
+.vscode/                      settings + extensões recomendadas (Metals, Docs View)
 scripts/
   new-day.sh                  cria solução + teste + input de um dia
   fetch-input.sh              baixa só o input
@@ -87,6 +90,22 @@ src/test/scala/aoc/           munit; exemplos do enunciado como teste
 `dijkstraTo`, todos sobre uma função de sucessores genérica.
 
 **`util.Numbers`** — `gcd`, `lcm`, `crt` (teorema chinês do resto), `findCycle`.
+
+## Formatação e editor
+
+O `.scalafmt.conf` é o mesmo contrato usado nos outros repos Scala: sintaxe de
+indentação do Scala 3, `maxColumn = 100`, sem alinhamento vertical (alinhar
+produz diff em linha que ninguém tocou) e `end` marker a partir de 25 linhas.
+
+```bash
+sbt scalafmtAll        # formata main + test
+sbt scalafmtCheckAll   # só verifica — é o gate antes de commitar
+```
+
+No VS Code, `.vscode/settings.json` liga o format-on-save via Metals (escopado
+em `[scala]`, para não reflowar o Markdown), importa o build sem prompt
+(`metals.autoImportBuilds: "all"`), põe a régua em 100 e deixa o hover sticky.
+`.vscode/extensions.json` recomenda Metals, Docs View e Better Comments.
 
 ## Testes
 

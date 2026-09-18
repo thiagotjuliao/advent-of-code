@@ -43,6 +43,7 @@ final class Input(raw: String):
   def isEmpty: Boolean = text.isEmpty
 
   override def toString: String = text
+end Input
 
 object Input:
   private val IntPattern = raw"-?\d+".r
