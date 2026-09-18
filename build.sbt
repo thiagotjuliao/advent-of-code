@@ -17,6 +17,6 @@ lazy val root = project
     Compile / mainClass := Some("aoc.Runner"),
     run / fork := true,
     run / connectInput := true,
-    // AoC adora recursao profunda e grids grandes
+    // The AoC loves deep recursion and large grids
     run / javaOptions ++= Seq("-Xss512m", "-Xmx4g")
   )

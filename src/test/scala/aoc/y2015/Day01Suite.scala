@@ -5,13 +5,13 @@ import munit.FunSuite
 
 class Day01Suite extends FunSuite:
 
-  test("parte 1: exemplos do enunciado") {
+  test("part 1: the examples from the puzzle text") {
     assertEquals(Day01.part1(Input("(())")), 0)
     assertEquals(Day01.part1(Input("(()(()(")), 3)
     assertEquals(Day01.part1(Input(")())())")), -3)
   }
 
-  test("parte 2: primeira posicao no porao") {
+  test("part 2: first position in the basement") {
     assertEquals(Day01.part2(Input(")")), 1)
     assertEquals(Day01.part2(Input("()())")), 5)
   }

@@ -1,44 +1,45 @@
 # Advent of Code — Scala 3
 
-Soluções do [Advent of Code](https://adventofcode.com) de **2015 a 2025**, em Scala 3.9.0.
+[Advent of Code](https://adventofcode.com) solutions for **2015 through 2025**, in Scala 3.9.0.
 
-Um único módulo sbt, um objeto por dia, descoberta por reflexão (sem registro manual)
-e download dos inputs sob demanda.
+One sbt module, one object per day, discovery by reflection (no registry to
+maintain) and inputs downloaded on demand.
 
-## Começando
+## Getting started
 
 ```bash
-cp .env.example .env     # e cole o cookie de sessão do adventofcode.com
-sbt test                 # compila tudo e roda os testes de exemplo
-sbt "run list"           # mostra o que já está implementado
+cp .env.example .env     # and paste your adventofcode.com session cookie
+sbt test                 # compiles everything and runs the example suites
+sbt "run list"           # shows what is implemented so far
 ```
 
-## Rodando
+## Running
 
-| comando | o que faz |
+| command | what it does |
 | --- | --- |
-| `sbt "run 2015 1"` | roda um dia |
-| `sbt "run 2024"` | roda todos os dias implementados de um ano |
-| `sbt "run all"` | roda tudo |
-| `sbt run` | em dezembro, roda o puzzle de hoje |
-| `sbt "run list"` | lista o que está implementado |
-| `sbt "run check 2015 1"` | roda as duas partes e sai com erro se faltar alguma |
-| `sbt "testOnly aoc.y2015.Day01Suite"` | roda o teste de um dia |
+| `sbt "run 2015 1"` | runs one day |
+| `sbt "run 2024"` | runs every implemented day of a year |
+| `sbt "run all"` | runs everything |
+| `sbt run` | in December, runs today's puzzle |
+| `sbt "run list"` | lists what is implemented |
+| `sbt "run check 2015 1"` | runs both parts and exits with an error if either is missing |
+| `sbt "testOnly aoc.y2015.Day01Suite"` | runs one day's tests |
 
-Cada parte sai com o tempo de execução ao lado — útil para saber quando a
-solução da parte 2 precisa parar de ser força bruta.
+Each part prints its runtime next to the answer — handy for knowing when the
+part 2 solution has to stop being brute force.
 
-## Começando um dia novo
+## Starting a new day
 
 ```bash
 ./scripts/new-day.sh 2024 7
 ```
 
-Isso cria `src/main/scala/aoc/y2024/Day07.scala`, o teste correspondente em
-`src/test/scala/aoc/y2024/Day07Suite.scala` e baixa `inputs/2024/day07.txt`.
+That creates `src/main/scala/aoc/y2024/Day07.scala`, its test at
+`src/test/scala/aoc/y2024/Day07Suite.scala`, and downloads
+`inputs/2024/day07.txt`.
 
-O arquivo nasce como stub (`object Day07 extends Solution(2024, 7)`); é só
-sobrescrever as partes:
+The file starts as a stub (`object Day07 extends Solution(2024, 7)`); just
+override the parts:
 
 ```scala
 object Day07 extends Solution(2024, 7):
@@ -46,116 +47,112 @@ object Day07 extends Solution(2024, 7):
   override def part2(in: Input): Any = in.ints.sum
 ```
 
-O runner enxerga o novo dia sozinho — não existe lista de registro para atualizar.
-Quem não sobrescreve nada continua marcado como não implementado e é ignorado
-por `run <ano>` e `run all`.
+The runner picks the new day up on its own — there is no registry to update.
+A day that overrides nothing stays marked as unimplemented and is skipped by
+`run <year>` and `run all`.
 
-Quando sair o AoC 2026: `./scripts/scaffold-year.sh 2026` e acrescente o ano em
-`Solutions.years`.
+Once the AoC 2026 is out: `./scripts/scaffold-year.sh 2026`, then add the year
+to `Solutions.years`.
 
-## Fechando um dia
+## Closing a day
 
-Quando as duas partes já valeram estrela:
+Once both parts have earned their stars:
 
 ```bash
 ./scripts/finish-day.sh 2015 1
 ```
 
-O script se recusa a fechar dia pela metade. Antes de encostar no git ele roda
-`scalafmtCheckAll`, a suíte inteira e `run check <ano> <dia>` — que executa as
-duas partes contra o seu input de verdade. Qualquer coisa falhando, não há
-commit nem tag.
+The script refuses to close a half-solved day. Before touching git it runs
+`scalafmtCheckAll`, the whole suite, and `run check <year> <day>` — which
+executes both parts against your real input. If anything fails, there is no
+commit and no tag.
 
-Passando, ele commita a solução (e o teste) e cria uma **tag anotada**:
+Passing, it commits the solution (and the test) and creates an **annotated tag**:
 
 | | |
 | --- | --- |
 | tag | `y2015-d01` |
-| assunto da tag | `AoC 2015 dia 01 — Not Quite Lisp` |
-| commit | `2015 dia 01 — Not Quite Lisp` |
+| tag subject | `AoC 2015 day 01 — Not Quite Lisp` |
+| commit | `2015 day 01 — Not Quite Lisp` |
 
-O título sai do scaladoc do próprio arquivo (`/** https://adventofcode.com/... — Título */`);
-`-t "Outro título"` sobrescreve. Outras opções: `--all` (inclui no commit o que
-mais estiver modificado), `--no-push`, `--no-verify`.
+The title comes from the file's own scaladoc
+(`/** https://adventofcode.com/... — Title */`); `-t "Another title"` overrides
+it. Other options: `--all` (also commits whatever else is modified),
+`--no-push`, `--no-verify`.
 
-Por fim ele dá `git push --follow-tags`, levando commit e tag juntos.
+Finally it runs `git push --follow-tags`, so the commit and the tag travel together.
 
-Para ver o placar: `git tag -l 'y2015*'`.
+For the scoreboard: `git tag -l 'y2015*'`.
 
-## Estrutura
+## Layout
 
 ```
 build.sbt                     sbt 2.0.8, Scala 3.9.0, munit
 project/plugins.sbt           sbt-scalafmt
-.scalafmt.conf                contrato de formatação (o mesmo dos outros repos Scala)
-.vscode/                      settings + extensões recomendadas (Metals, Docs View)
+.scalafmt.conf                formatting contract (the same as the other Scala repos)
+.vscode/                      settings + recommended extensions (Metals, Docs View)
 scripts/
-  new-day.sh                  cria solução + teste + input de um dia
-  fetch-input.sh              baixa só o input
-  scaffold-year.sh            cria os 25 stubs de um ano novo
-  finish-day.sh               verifica, commita, tagueia e faz push de um dia
-inputs/YYYY/dayDD.txt         inputs (git-ignorados de propósito)
+  new-day.sh                  creates a day's solution + test + input
+  fetch-input.sh              downloads just the input
+  scaffold-year.sh            creates the 25 stubs of a new year
+  finish-day.sh               verifies, commits, tags and pushes a day
+inputs/YYYY/dayDD.txt         inputs (git-ignored on purpose)
 src/main/scala/aoc/
-  Solution.scala              classe base (year, day, part1, part2)
-  Input.scala                 texto do puzzle já parseado de N formas
-  Solutions.scala             descoberta por reflexão
-  AocInput.scala              leitura em disco + download com cache
-  Runner.scala                CLI
-  util/                       Point, Grid, Search, Numbers
-  yYYYY/DayDD.scala           uma solução por arquivo
-src/test/scala/aoc/           munit; exemplos do enunciado como teste
+  Solution.scala              base class (year, day, part1, part2)
+  Input.scala                 the puzzle text, parsed N ways
+  Solutions.scala             discovery by reflection
+  AocInput.scala              disk reads + cached downloads
+  Runner.scala                the CLI
+  yYYYY/DayDD.scala           one solution per file
+src/test/scala/aoc/           munit; the puzzle examples as tests
 ```
 
-## O que vem pronto
+## What comes with it
 
-**`Input`** — `text`, `lines`, `blocks` (separados por linha em branco), `ints`,
-`longs`, `intLines`, `words`, `grid`, `splitOn(sep)`, `captures(regex)`.
+**`Input`** — the puzzle text, parsed the usual ways: `text`, `lines`,
+`blocks` (split on blank lines), `ints`, `longs`, `intLines`, `words`, `chars`,
+`splitOn(sep)`, `captures(regex)`.
 
-**`util.Point`** — aritmética 2D, `neighbors4/8`, `manhattan`, `rotateLeft/Right`,
-`lineTo`. Convenção: `x` para a direita, `y` para **baixo**.
+That is the whole toolbox on purpose. Grids, points, graph searches and modular
+arithmetic get written when a day actually asks for them.
 
-**`util.Grid[A]`** — grade imutável indexada por `Point`: `get`, `updated`,
-`points`, `entries`, `find`, `where`, `neighbors4/8`, `map`, `transpose`, `render`.
+## Formatting and editor
 
-**`util.Search`** — `bfs` (distâncias), `bfsPath` (caminho), `dijkstra` e
-`dijkstraTo`, todos sobre uma função de sucessores genérica.
-
-**`util.Numbers`** — `gcd`, `lcm`, `crt` (teorema chinês do resto), `findCycle`.
-
-## Formatação e editor
-
-O `.scalafmt.conf` é o mesmo contrato usado nos outros repos Scala: sintaxe de
-indentação do Scala 3, `maxColumn = 100`, sem alinhamento vertical (alinhar
-produz diff em linha que ninguém tocou) e `end` marker a partir de 25 linhas.
+`.scalafmt.conf` is the same contract the other Scala repos use: Scala 3
+indentation syntax, `maxColumn = 100`, no vertical alignment (aligning produces
+diffs on lines nobody touched) and an `end` marker from 25 lines up.
 
 ```bash
-sbt scalafmtAll        # formata main + test
-sbt scalafmtCheckAll   # só verifica — é o gate antes de commitar
+sbt scalafmtAll        # formats main + test
+sbt scalafmtCheckAll   # only checks — the gate before committing
 ```
 
-No VS Code, `.vscode/settings.json` liga o format-on-save via Metals (escopado
-em `[scala]`, para não reflowar o Markdown), importa o build sem prompt
-(`metals.autoImportBuilds: "all"`), põe a régua em 100 e deixa o hover sticky.
-`.vscode/extensions.json` recomenda Metals, Docs View e Better Comments.
+In VS Code, `.vscode/settings.json` turns on format-on-save through Metals
+(scoped to `[scala]`, so it will not reflow the Markdown), imports the build
+without a prompt (`metals.autoImportBuilds: "all"`), puts the ruler at 100 and
+makes hovers sticky. `.vscode/extensions.json` recommends Metals, Docs View and
+Better Comments.
 
-## Testes
+## Tests
 
-Os exemplos do enunciado viram teste com [munit](https://scalameta.org/munit/):
+The examples from the puzzle text become tests, with
+[munit](https://scalameta.org/munit/):
 
 ```scala
 class Day01Suite extends FunSuite:
-  test("parte 1: exemplos do enunciado") {
+  test("part 1: the examples from the puzzle text") {
     assertEquals(Day01.part1(Input("(())")), 0)
   }
 ```
 
-Os testes gerados pelo `new-day.sh` já nascem com `.ignore` — tire o `.ignore`
-depois de colar o exemplo do dia.
+The tests generated by `new-day.sh` start out with `.ignore` — drop it once you
+have pasted the day's example in.
 
-## Sobre inputs e enunciados
+## About inputs and puzzle texts
 
-`inputs/` está no `.gitignore` porque o AoC pede que inputs e textos dos puzzles
-não sejam redistribuídos — só as soluções. O download usa seu cookie de sessão
-(em `.env`, também git-ignorado), guarda o arquivo em disco e nunca rebaixa o
-mesmo dia, seguindo as [regras de automação](https://www.reddit.com/r/adventofcode/wiki/faqs/automation)
-do evento (inclusive o `User-Agent` com contato).
+`inputs/` is in `.gitignore` because the AoC asks that inputs and puzzle texts
+are not redistributed — only the solutions. Downloading uses your session
+cookie (from `.env`, also git-ignored), keeps the file on disk and never
+re-downloads the same day, following the event's
+[automation rules](https://www.reddit.com/r/adventofcode/wiki/faqs/automation),
+`User-Agent` with a contact included.

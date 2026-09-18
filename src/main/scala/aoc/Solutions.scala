@@ -1,13 +1,13 @@
 package aoc
 
-/** Descoberta das solucoes.
+/** Solution discovery.
   *
-  * Nao existe registro manual: o runner procura pela classe
-  * `aoc.yYYYY.DayDD` via reflexao, entao basta criar o arquivo.
+  * There is no registry to maintain: the runner looks up `aoc.yYYYY.DayDD`
+  * by reflection, so creating the file is enough.
   */
 object Solutions:
 
-  /** Anos com evento publicado (o AoC comeca todo 1 de dezembro). */
+  /** Years whose event has been published (the AoC starts every December 1st). */
   val years: Vector[Int] = (2015 to 2025).toVector
 
   val days: Vector[Int] = (1 to 25).toVector
@@ -25,7 +25,7 @@ object Solutions:
 
   def isImplemented(s: Solution): Boolean = s.solved(1) || s.solved(2)
 
-  /** Do ano, somente o que tem ao menos uma parte implementada (ignora os stubs). */
+  /** The year's days with at least one part implemented — stubs left out. */
   def implementedOfYear(year: Int): Vector[Solution] = ofYear(year).filter(isImplemented)
 
   def implemented: Vector[Solution] = years.flatMap(implementedOfYear)

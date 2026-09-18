@@ -1,9 +1,9 @@
 package aoc
 
-/** Uma solucao de um dia do Advent of Code.
+/** One day of the Advent of Code.
   *
-  * Implemente sobrescrevendo `part1` / `part2`. O que nao for sobrescrito
-  * continua marcado como [[Solution.Unsolved]] e o runner simplesmente pula.
+  * Solve it by overriding `part1` / `part2`. Whatever is left alone stays
+  * marked as [[Solution.Unsolved]] and the runner simply skips it.
   *
   * {{{
   * object Day01 extends Solution(2015, 1):
@@ -15,9 +15,9 @@ abstract class Solution(val year: Int, val day: Int):
   def part1(in: Input): Any = Solution.Unsolved
   def part2(in: Input): Any = Solution.Unsolved
 
-  final def label: String = f"$year%04d dia $day%02d"
+  final def label: String = f"$year%04d day $day%02d"
 
-  /** Se a parte foi sobrescrita nesta solucao (checado sem executar nada). */
+  /** Whether this part was overridden here — checked without running anything. */
   final def solved(part: Int): Boolean =
     val name = if part == 1 then "part1" else "part2"
     try getClass.getDeclaredMethod(name, classOf[Input]) != null
@@ -25,6 +25,6 @@ abstract class Solution(val year: Int, val day: Int):
 
 object Solution:
 
-  /** Marcador devolvido pelas partes ainda nao implementadas. */
+  /** What the parts that are not implemented yet return. */
   case object Unsolved:
     override def toString: String = "—"

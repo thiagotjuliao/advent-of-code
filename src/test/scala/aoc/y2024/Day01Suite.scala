@@ -14,10 +14,10 @@ class Day01Suite extends FunSuite:
     |3   3
   """.stripMargin.trim)
 
-  test("parte 1: distancia total") {
+  test("part 1: total distance") {
     assertEquals(Day01.part1(sample), 11)
   }
 
-  test("parte 2: score de similaridade") {
+  test("part 2: similarity score") {
     assertEquals(Day01.part2(sample), 31)
   }

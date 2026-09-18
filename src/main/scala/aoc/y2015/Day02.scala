@@ -5,7 +5,7 @@ import aoc.{Input, Solution}
 /** https://adventofcode.com/2015/day/2 — I Was Told There Would Be No Math */
 object Day02 extends Solution(2015, 2):
 
-  /** Cada linha "LxWxH" vira as tres dimensoes em ordem crescente. */
+  /** Each "LxWxH" line becomes its three dimensions in ascending order. */
   private def boxes(in: Input): Vector[(Int, Int, Int)] =
     in.lines.map(_.split("x").map(_.trim.toInt).sorted).map(d => (d(0), d(1), d(2)))
 

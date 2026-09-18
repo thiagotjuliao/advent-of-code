@@ -1,41 +1,39 @@
 package aoc
 
-import aoc.util.Grid
-
-/** O texto do puzzle, com as leituras mais comuns ja prontas.
+/** The puzzle text, with the most common readings already prepared.
   *
-  * Tudo e `lazy`: so paga o parse que voce usar.
+  * Everything is `lazy`: you only pay for the parsing you actually use.
   */
 final class Input(raw: String):
 
-  /** Texto sem o whitespace final (o AoC sempre manda um `\n` no fim). */
+  /** The text without trailing whitespace (the AoC always sends a final `\n`). */
   lazy val text: String = raw.stripTrailing
 
-  /** Uma linha por elemento. */
+  /** One line per element. */
   lazy val lines: Vector[String] = text.linesIterator.toVector
 
-  /** Blocos separados por linha em branco (formato classico do AoC). */
+  /** Blocks separated by a blank line — the classic AoC layout. */
   lazy val blocks: Vector[Input] =
     text.split("\\R\\s*\\R").toVector.map(b => Input(b))
 
-  /** Todos os inteiros que aparecem no texto, sinal incluso. */
+  /** Every integer in the text, sign included. */
   lazy val ints: Vector[Int] = Input.IntPattern.findAllIn(text).map(_.toInt).toVector
 
   lazy val longs: Vector[Long] = Input.IntPattern.findAllIn(text).map(_.toLong).toVector
 
-  /** Uma linha por inteiro (lista de numeros, um por linha). */
+  /** One integer per line (a list of numbers, one per line). */
   lazy val intLines: Vector[Int] = lines.map(_.trim.toInt)
 
-  /** Palavras separadas por qualquer whitespace. */
+  /** Words split on any whitespace. */
   lazy val words: Vector[String] = text.split("\\s+").toVector.filter(_.nonEmpty)
 
-  /** O texto como grade de caracteres. */
-  lazy val grid: Grid[Char] = Grid.fromLines(lines)
+  /** The text as rows of characters. */
+  lazy val chars: Vector[Vector[Char]] = lines.map(_.toVector)
 
-  /** Divide o texto por um separador arbitrario. */
+  /** Splits the text on an arbitrary separator. */
   def splitOn(sep: String): Vector[String] = text.split(sep).toVector.map(_.trim)
 
-  /** Aplica um regex linha a linha, devolvendo os grupos capturados. */
+  /** Applies a regex line by line, returning the captured groups. */
   def captures(pattern: String): Vector[Vector[String]] =
     val re = pattern.r
     lines.flatMap(l => re.findFirstMatchIn(l).map(m => (1 to m.groupCount).toVector.map(m.group)))
