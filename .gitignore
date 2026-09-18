@@ -1,0 +1,21 @@
+# sbt / JVM
+target/
+project/target/
+project/project/
+.bsp/
+*.class
+
+# IDEs / Metals
+.metals/
+.bloop/
+.ammonite/
+.idea/
+.vscode/
+metals.sbt
+
+# Segredos
+.env
+
+# Inputs e enunciados sao pessoais: o AoC pede para nao redistribuir.
+inputs/**/*.txt
+!inputs/**/.gitkeep

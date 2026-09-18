@@ -1,0 +1,77 @@
+package aoc
+
+import java.net.URI
+import java.net.http.{HttpClient, HttpRequest, HttpResponse}
+import java.nio.file.{Files, Path}
+import scala.jdk.CollectionConverters.*
+
+/** Leitura (e download sob demanda) dos inputs.
+  *
+  * Os arquivos ficam em `inputs/YYYY/dayDD.txt` e sao git-ignorados de
+  * proposito: o AoC pede que inputs e enunciados nao sejam redistribuidos.
+  * Uma vez baixado, o arquivo e reusado — nada de bater no servidor a cada run.
+  */
+object AocInput:
+
+  private val root: Path = Path.of(sys.env.getOrElse("AOC_INPUT_DIR", "inputs"))
+
+  def path(year: Int, day: Int): Path =
+    root.resolve(f"$year%04d").resolve(f"day$day%02d.txt")
+
+  /** Le do disco; se nao existir e houver `AOC_SESSION`, baixa e salva. */
+  def load(year: Int, day: Int): Either[String, Input] =
+    val file = path(year, day)
+    if Files.exists(file) && Files.size(file) > 0 then
+      Right(Input(Files.readString(file)))
+    else
+      download(year, day).map { body =>
+        Files.createDirectories(file.getParent)
+        Files.writeString(file, body)
+        Input(body)
+      }
+
+  def download(year: Int, day: Int): Either[String, String] =
+    config("AOC_SESSION").filter(_.nonEmpty) match
+      case None =>
+        Left(
+          s"input ausente em ${path(year, day)} e AOC_SESSION nao configurado " +
+            "(copie .env.example para .env e preencha, ou baixe o arquivo na mao)"
+        )
+      case Some(session) =>
+        val contact = config("AOC_CONTACT").getOrElse("unknown contact")
+        val request = HttpRequest
+          .newBuilder(URI.create(s"https://adventofcode.com/$year/day/$day/input"))
+          .header("Cookie", s"session=$session")
+          .header("User-Agent", s"scala-aoc-runner (contato: $contact)")
+          .GET()
+          .build()
+        try
+          val response = client.send(request, HttpResponse.BodyHandlers.ofString)
+          response.statusCode match
+            case 200 => Right(response.body)
+            case 400 => Left("HTTP 400: cookie de sessao invalido ou expirado — renove AOC_SESSION")
+            case 404 => Left(s"HTTP 404: o puzzle $year/$day ainda nao foi liberado")
+            case c   => Left(s"HTTP $c ao baixar o input de $year/$day")
+        catch case e: Exception => Left(s"falha de rede: ${e.getMessage}")
+
+  private lazy val client: HttpClient =
+    HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build()
+
+  /** Variavel de ambiente, com fallback para o arquivo `.env` da raiz. */
+  private def config(key: String): Option[String] =
+    sys.env.get(key).orElse(dotenv.get(key))
+
+  private lazy val dotenv: Map[String, String] =
+    val file = Path.of(".env")
+    if !Files.exists(file) then Map.empty
+    else
+      Files
+        .readAllLines(file)
+        .asScala
+        .map(_.trim)
+        .filter(l => l.nonEmpty && !l.startsWith("#") && l.contains("="))
+        .map { line =>
+          val Array(k, v) = line.split("=", 2)
+          k.trim -> v.trim.stripPrefix("\"").stripSuffix("\"")
+        }
+        .toMap
