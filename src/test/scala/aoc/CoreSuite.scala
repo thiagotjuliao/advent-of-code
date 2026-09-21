@@ -40,7 +40,17 @@ class CoreSuite extends FunSuite:
   test("Solutions: discovery by reflection") {
     assert(Solutions.find(2015, 1).isDefined)
     assertEquals(Solutions.find(2015, 1).map(_.label), Some("2015 day 01"))
-    assert(Solutions.find(2015, 1).exists(s => !s.solved(1)), "a stub must not count as solved")
-    assertEquals(Solutions.implemented, Vector.empty)
+    assert(Solutions.find(2015, 26).isEmpty, "there is no day 26")
+  }
+
+  // Against fixtures, not against a real day: a day borrowed to stand for a
+  // stub stops being one the moment it is solved, and takes the test with it.
+  test("Solutions: a day that registers nothing is not implemented") {
+    object Stub extends Solution(1999, 3)
+    object Done extends Solution(1999, 4):
+      part1 { in => in.text.length }
+
+    assert(!Solutions.isImplemented(Stub))
+    assert(Solutions.isImplemented(Done))
   }
 end CoreSuite
