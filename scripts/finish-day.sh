@@ -50,18 +50,36 @@ fi
 HEADLINE="$YEAR day $DD"
 [[ -n "$TITLE" ]] && HEADLINE="$HEADLINE — $TITLE"
 
-if [[ $VERIFY -eq 1 ]]; then
-  echo "verifying $HEADLINE ..."
-  # The sed drops sbt's own stack trace when `run check` exits nonzero: what
-  # matters is the "failed: ..." line just above it.
-  sbt -batch "scalafmtCheckAll; test; run check $YEAR $DAY" 2>&1 \
-    | sed -e '/[[:space:]]at [A-Za-z_$][A-Za-z0-9_.$]*[.(]/d' \
-          -e '/nonzero exit code returned from runner/d' \
-          -e '/sbt server disconnected/d' \
-    || die "verification failed — nothing was committed or tagged"
-else
-  echo "skipping verification (--no-verify)"
-fi
+# Where the staged tree gets built. Under target/, so it is git-ignored and
+# `sbt clean` takes it away.
+VERIFY_DIR="$ROOT/target/finish-day"
+
+# Checks out the *index* into a scratch directory and runs the gate in there.
+#
+# Running the gate against the working tree instead passes on files that are
+# not going into the commit: a source that was never `git add`ed is present on
+# disk and absent from the tag, which is how a green run still publishes a tree
+# that does not compile. This copy holds exactly what the commit will hold.
+verify_staged_tree() {
+  rm -rf "$VERIFY_DIR"
+  mkdir -p "$VERIFY_DIR"
+  git checkout-index --all --prefix="target/finish-day/" || return 1
+  # inputs/ is git-ignored on purpose, and `run check` reads the day out of it
+  [[ -d "$ROOT/inputs" ]] && cp -r "$ROOT/inputs/." "$VERIFY_DIR/inputs/"
+  (
+    cd "$VERIFY_DIR" || exit 1
+    # The sed drops sbt's own stack trace when `run check` exits nonzero: what
+    # matters is the "failed: ..." line just above it.
+    sbt -batch "scalafmtCheckAll; test; run check $YEAR $DAY" 2>&1 \
+      | sed -e '/[[:space:]]at [A-Za-z_$][A-Za-z0-9_.$]*[.(]/d' \
+            -e '/nonzero exit code returned from runner/d' \
+            -e '/sbt server disconnected/d'
+  )
+}
+
+# Staging comes first, so that what gets verified is what gets committed. If the
+# gate then fails, the index goes back to exactly how it was found.
+INDEX_BEFORE="$(git write-tree)"
 
 if [[ $ALL -eq 1 ]]; then
   git add -A
@@ -75,6 +93,19 @@ else
     echo "$others" | sed 's/^/  /'
     echo
   fi
+fi
+
+if [[ $VERIFY -eq 1 ]]; then
+  echo "verifying $HEADLINE as it will be committed ..."
+  if verify_staged_tree; then
+    rm -rf "$VERIFY_DIR"
+  else
+    git read-tree "$INDEX_BEFORE"
+    echo "the tree that failed is still at ${VERIFY_DIR#"$ROOT/"}" >&2
+    die "verification failed — nothing was committed or tagged"
+  fi
+else
+  echo "skipping verification (--no-verify)"
 fi
 
 if git diff --cached --quiet; then

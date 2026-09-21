@@ -92,10 +92,17 @@ Once both parts have earned their stars:
 ./scripts/finish-day.ps1 2015 1
 ```
 
-The script refuses to close a half-solved day. Before touching git it runs
-`scalafmtCheckAll`, the whole suite, and `run check <year> <day>` — which
-executes both parts against your real input. If anything fails, there is no
-commit and no tag.
+The script refuses to close a half-solved day. It stages the commit first,
+checks *that tree* out into `target/finish-day/`, and runs `scalafmtCheckAll`,
+the whole suite and `run check <year> <day>` in there — which executes both
+parts against your real input.
+
+Verifying the staged tree rather than the working tree is the point: a source
+file you forgot to `git add` is present on disk and absent from the commit, so
+a gate that reads the working tree goes green and publishes a tag that does not
+compile. In the scratch copy the file is missing, and the build fails where it
+should. If anything fails, the index goes back to how it was found, and there
+is no commit and no tag.
 
 Passing, it commits the solution (and the test) and creates an **annotated tag**:
 
@@ -126,7 +133,7 @@ scripts/
   new-day.{sh,ps1}            creates a day's solution + test + input
   fetch-input.{sh,ps1}        downloads just the input
   scaffold-year.{sh,ps1}      creates the 25 stubs of a new year
-  finish-day.{sh,ps1}         verifies, commits, tags and pushes a day
+  finish-day.{sh,ps1}         stages, verifies that tree, commits, tags, pushes
 inputs/YYYY/dayDD.txt         inputs (git-ignored on purpose)
 src/main/scala/aoc/
   Solution.scala              base class: registers and runs a day's parts

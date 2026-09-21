@@ -45,6 +45,46 @@ function Die([string]$Message) {
   exit 1
 }
 
+# Checks out the *index* into a scratch directory and runs the gate in there.
+#
+# Running the gate against the working tree instead passes on files that are
+# not going into the commit: a source that was never `git add`ed is present on
+# disk and absent from the tag, which is how a green run still publishes a tree
+# that does not compile. This copy holds exactly what the commit will hold.
+function Test-StagedTree([string]$Dir, [int]$Year, [int]$Day) {
+  Remove-Item -Recurse -Force $Dir -ErrorAction SilentlyContinue
+  New-Item -ItemType Directory -Force -Path $Dir | Out-Null
+
+  & git checkout-index --all --prefix="$Dir/"
+  if ($LASTEXITCODE -ne 0) { return $false }
+
+  # inputs/ is git-ignored on purpose, and `run check` reads the day out of it
+  if (Test-Path -LiteralPath 'inputs') {
+    foreach ($file in Get-ChildItem 'inputs' -Recurse -File -Filter '*.txt') {
+      $target = Join-Path $Dir ([IO.Path]::GetRelativePath($PWD.Path, $file.FullName))
+      New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
+      Copy-Item -LiteralPath $file.FullName -Destination $target -Force
+    }
+  }
+
+  # The filter drops sbt's own stack trace when `run check` exits nonzero: what
+  # matters is the "failed: ..." line just above it.
+  $noise = '(\sat [A-Za-z_$][A-Za-z0-9_.$]*[.(])|' +
+           '(nonzero exit code returned from runner)|' +
+           '(sbt server disconnected)'
+
+  Push-Location $Dir
+  try {
+    & sbt -batch "scalafmtCheckAll; test; run check $Year $Day" 2>&1 |
+      ForEach-Object { [string]$_ } |
+      Where-Object { $_ -notmatch $noise } |
+      ForEach-Object { Write-Host $_ }
+    return ($LASTEXITCODE -eq 0)
+  }
+  finally { Pop-Location }
+}
+
+
 $root = Split-Path -Parent $PSScriptRoot
 Push-Location $root
 try {
@@ -72,24 +112,13 @@ try {
   $headline = "$Year day $dd"
   if (-not [string]::IsNullOrWhiteSpace($Title)) { $headline = "$headline — $Title" }
 
-  if ($NoVerify) {
-    Write-Host 'skipping verification (-NoVerify)'
-  }
-  else {
-    Write-Host "verifying $headline ..."
-    # The filter drops sbt's own stack trace when `run check` exits nonzero: what
-    # matters is the "failed: ..." line just above it.
-    $noise = '(\sat [A-Za-z_$][A-Za-z0-9_.$]*[.(])|' +
-             '(nonzero exit code returned from runner)|' +
-             '(sbt server disconnected)'
-    & sbt -batch "scalafmtCheckAll; test; run check $Year $Day" 2>&1 |
-      ForEach-Object { [string]$_ } |
-      Where-Object { $_ -notmatch $noise } |
-      ForEach-Object { Write-Host $_ }
-    if ($LASTEXITCODE -ne 0) {
-      Die 'verification failed — nothing was committed or tagged'
-    }
-  }
+  # Where the staged tree gets built. Under target/, so it is git-ignored and
+  # `sbt clean` takes it away.
+  $verifyDir = 'target/finish-day'
+
+  # Staging comes first, so that what gets verified is what gets committed. If
+  # the gate then fails, the index goes back to exactly how it was found.
+  $indexBefore = (& git write-tree).Trim()
 
   if ($All) {
     & git add -A
@@ -106,6 +135,21 @@ try {
       Write-Host 'heads up, left out of the commit (use -All to include):'
       $others | ForEach-Object { Write-Host "  $_" }
       Write-Host ''
+    }
+  }
+
+  if ($NoVerify) {
+    Write-Host 'skipping verification (-NoVerify)'
+  }
+  else {
+    Write-Host "verifying $headline as it will be committed ..."
+    if (Test-StagedTree $verifyDir $Year $Day) {
+      Remove-Item -Recurse -Force $verifyDir -ErrorAction SilentlyContinue
+    }
+    else {
+      & git read-tree $indexBefore
+      [Console]::Error.WriteLine("the tree that failed is still at $verifyDir")
+      Die 'verification failed — nothing was committed or tagged'
     }
   }
 
