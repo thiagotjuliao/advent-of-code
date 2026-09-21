@@ -1,6 +1,7 @@
 package aoc
 
 import java.time.{LocalDate, ZoneId}
+import java.util.Locale
 import scala.util.{Failure, Success, Try}
 
 /** The repo's CLI.
@@ -53,34 +54,33 @@ object Runner:
   private def runMany(solutions: Seq[Solution]): Unit =
     if solutions.isEmpty then println("Nothing implemented here yet.")
     else
-      val total = solutions.map(run).sum
-      println(f"%n= total: $total%.1f ms across ${solutions.size} day(s)")
+      val total = solutions.map(run).foldLeft(Cost.zero)(_ + _)
+      println()
+      println(s"= total: ${total.render} across ${solutions.size} day(s)")
 
-  private def run(solution: Solution): Double =
+  private def run(solution: Solution): Cost =
     println(s"${Console.BOLD}── ${solution.label} ──${Console.RESET}")
     AocInput.load(solution.year, solution.day) match
       case Left(error) =>
         println(s"  ${Console.YELLOW}no input: $error${Console.RESET}")
-        0.0
+        Cost.zero
       case Right(input) =>
-        Seq(1, 2).map(part => runPart(solution, part, input)).sum
+        Seq(1, 2).map(part => runPart(solution, part, input)).foldLeft(Cost.zero)(_ + _)
 
-  private def runPart(solution: Solution, part: Int, input: Input): Double =
+  private def runPart(solution: Solution, part: Int, input: Input): Cost =
     if !solution.solved(part) then
       println(s"  part $part: —")
-      0.0
+      Cost.zero
     else
-      val started = System.nanoTime()
-      val outcome = Try(solution.solve(part, input))
-      val millis = (System.nanoTime() - started) / 1e6
+      val (outcome, cost) = Cost.of(Try(solution.solve(part, input)))
       outcome match
         case Success(value) =>
-          val padded = String.format("%-26s", String.valueOf(value))
-          println(f"  part $part: ${Console.GREEN}$padded${Console.RESET} ($millis%.1f ms)")
+          val padded = String.format(Locale.ROOT, "%-26s", String.valueOf(value))
+          println(s"  part $part: ${Console.GREEN}$padded${Console.RESET} (${cost.render})")
         case Failure(error) =>
           val what = s"${error.getClass.getSimpleName}: ${error.getMessage}"
           println(s"  part $part: ${Console.RED}$what${Console.RESET}")
-      millis
+      cost
 
   /** What `finish-day.sh` calls: runs both parts and exits 1 if either one is
     * missing, blows up, or has no input. No tag for a half-solved day.

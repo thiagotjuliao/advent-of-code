@@ -25,8 +25,20 @@ sbt "run list"           # shows what is implemented so far
 | `sbt "run check 2015 1"` | runs both parts and exits with an error if either is missing |
 | `sbt "testOnly aoc.y2015.Day01Suite"` | runs one day's tests |
 
-Each part prints its runtime next to the answer — handy for knowing when the
-part 2 solution has to stop being brute force.
+Each part prints what it cost next to the answer — wall-clock time and bytes
+allocated:
+
+```
+── 2015 day 01 ──
+  part 1: 138                        (4.7 ms, 238.6 KiB)
+  part 2: 1771                       (0.2 ms, 472 B)
+```
+
+The bytes are what the part allocated in total, not what it held at once: the
+number the collector has to work for. Unlike the milliseconds it is exact and
+repeats run to run, which makes it the better signal for when a solution has to
+stop being brute force — an accidentally quadratic part shows up there long
+before it shows up on the clock.
 
 ## Starting a new day
 
@@ -118,6 +130,7 @@ scripts/
 inputs/YYYY/dayDD.txt         inputs (git-ignored on purpose)
 src/main/scala/aoc/
   Solution.scala              base class: registers and runs a day's parts
+  Cost.scala                  what a part cost to run: time and bytes
   Input.scala                 the puzzle text, parsed N ways
   Solutions.scala             discovery by reflection
   AocInput.scala              disk reads + cached downloads
