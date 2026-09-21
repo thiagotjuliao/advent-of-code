@@ -1,7 +1,6 @@
 package aoc.y2015
 
 import aoc.AOCFunSuite
-import aoc.y2015.Day01
 import aoc.Input
 
 class Day01Suite extends AOCFunSuite(Day01):
