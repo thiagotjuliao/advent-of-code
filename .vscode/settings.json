@@ -26,6 +26,52 @@
   "metals.autoImportBuilds": "all",
 
   // ---------------------------------------------------------------------------
+  // Diagnostics, shown inline
+  //
+  // VS Code has no native way to print a diagnostic's text on the line it
+  // belongs to — the built-in rendering is a squiggle plus a hover, and the
+  // long-standing request for inline messages (microsoft/vscode#27703) is
+  // still open. Error Lens (see extensions.json) fills that gap.
+  //
+  // The timing here is not the usual one. Metals reports through Bloop, so
+  // diagnostics land per *compile*, not per keystroke: a message appears after
+  // a save and can lag the text it describes. The delay below keeps errors
+  // from a half-finished compile out of the margin.
+  //
+  // removeLinebreaks matters specifically for Scala 3, whose errors are
+  // multi-line by design ("Found: ... Required: ..."). Without it only the
+  // first line survives — usually the least informative half of the message.
+  // ---------------------------------------------------------------------------
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
+  "errorLens.delay": 300,
+  "errorLens.removeLinebreaks": true,
+  "errorLens.messageMaxChars": 200,
+
+  // Tint only the message text, not the whole line. A full-width highlight
+  // competes with syntax colouring on the code actually being read.
+  "errorLens.messageBackgroundMode": "message",
+  "errorLens.fontStyleItalic": true,
+
+  // ---------------------------------------------------------------------------
+  // Diagnostic colours
+  //
+  // Error Lens contributes its own theme colour IDs rather than plain settings,
+  // so its palette is set here and not under "errorLens.*". The trailing "1a"
+  // is alpha: the backgrounds are deliberately near-transparent, since a solid
+  // block behind the message outshouts the code it annotates.
+  //
+  // editorError.foreground is VS Code's own squiggle, restated so the native
+  // underline and the inline text agree on one red.
+  // ---------------------------------------------------------------------------
+  "workbench.colorCustomizations": {
+    "errorLens.errorForeground": "#ff5370",
+    "errorLens.errorMessageBackground": "#ff53701a",
+    "errorLens.warningForeground": "#ffb62c",
+    "errorLens.warningMessageBackground": "#ffb62c1a",
+    "editorError.foreground": "#ff5370"
+  },
+
+  // ---------------------------------------------------------------------------
   // Documentation rendering
   //
   // VS Code cannot render a doc comment in place the way IntelliJ's
