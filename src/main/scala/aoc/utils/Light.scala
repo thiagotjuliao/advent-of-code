@@ -3,15 +3,25 @@ package aoc.utils
 import Light.State
 
 final case class Light private (state: State):
-  def turnOn: Light = Light(State.ON)
-  def turnOff: Light = Light(State.OFF)
+  def isOn: Boolean = state == State.ON
+
+  def turnOn: Light = Light.On
+
+  def turnOff: Light = Light.Off
 
   def toggle: Light = state match
-    case State.ON => Light(State.OFF)
-    case State.OFF => Light(State.ON)
+    case State.ON => Light.Off
+    case State.OFF => Light.On
+
+  override def toString: String = state match
+    case State.ON => "[o]"
+    case State.OFF => "[x]"
 
 object Light:
   enum State:
     case OFF, ON
 
-  val put: Light = Light(State.OFF)
+  val On: Light = Light(State.ON)
+  val Off: Light = Light(State.OFF)
+
+  val put: Light = Off
