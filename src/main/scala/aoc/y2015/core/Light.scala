@@ -1,4 +1,4 @@
-package aoc.utils
+package aoc.y2015.core
 
 import Light.State
 
@@ -12,10 +12,6 @@ final case class Light private (state: State):
   def toggle: Light = state match
     case State.ON => Light.Off
     case State.OFF => Light.On
-
-  override def toString: String = state match
-    case State.ON => "[o]"
-    case State.OFF => "[x]"
 
 object Light:
   enum State:

@@ -5,39 +5,7 @@ import scala.reflect.ClassTag
 final class Grid[T: ClassTag] private (shape: Array[Int], cells: Array[T]):
   private val strides = shape.scanRight(1)(_ * _).tail
 
-  private def idx(dims: Int*): Int =
-    require(
-      dims.size == shape.size,
-      s"number of dimensions must be equal to the grid's size (${shape.size}). Got ${dims.size} instead"
-    )
-    dims.zip(strides).map(_ * _).sum
-
-  private def unravel(idx: Int): Array[Int] =
-    strides
-      .scanLeft((0, idx)):
-        case ((_, rem), s) => (rem / s, rem % s)
-      .tail
-      .map(_._1)
-
   def data: Seq[T] = cells.toSeq
-
-  def get(dims: Int*): T =
-    cells(idx(dims*))
-
-  def set(value: T, dims: Int*): Grid[T] =
-    Grid(shape, cells.updated(idx(dims*), value))
-
-  def update(dims: Int*)(f: T => T): Grid[T] =
-    Grid(shape, cells.updated(idx(dims*), f(get(dims*))))
-
-  def fold(dims: Seq[Seq[Int]])(f: T => T): Grid[T] =
-    val next = cells.clone()
-
-    dims.foreach: d =>
-      val i = idx(d*)
-      next(i) = f(next(i))
-
-    Grid(shape, next)
 
   def foldRegion(rows: Range, cols: Range)(f: T => T): Grid[T] =
     require(shape.length == 2, s"foldRegion expects a 2-D grid, got rank ${shape.length}")

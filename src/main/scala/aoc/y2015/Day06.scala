@@ -2,7 +2,7 @@ package aoc.y2015
 
 import aoc.Solution
 import aoc.utils.Grid
-import aoc.utils.Light
+import aoc.y2015.core.Light
 
 /** https://adventofcode.com/2015/day/6
   *

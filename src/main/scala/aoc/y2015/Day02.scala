@@ -1,7 +1,7 @@
 package aoc.y2015
 
 import aoc.Solution
-import aoc.utils.RectangularPrism
+import aoc.y2015.core.RectangularPrism
 import scala.util.chaining.*
 
 /** https://adventofcode.com/2015/day/2

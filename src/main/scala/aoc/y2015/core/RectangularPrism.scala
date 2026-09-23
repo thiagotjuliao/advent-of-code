@@ -1,12 +1,6 @@
-package aoc.utils
+package aoc.y2015.core
 
-sealed trait Shape:
-  def totalArea: Int
-  def totalVolume: Int
-  def sidePerimeters: Seq[Int]
-end Shape
-
-final case class RectangularPrism(l: Int, w: Int, h: Int) extends Shape:
+final case class RectangularPrism(l: Int, w: Int, h: Int):
   val totalArea = 2 * (l * w + w * h + h * l)
 
   val totalVolume = l * w * h
