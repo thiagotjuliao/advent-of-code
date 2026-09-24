@@ -135,6 +135,12 @@
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
 
+  // LF on disk, not only in the repo. .gitattributes normalises line endings
+  // at commit time, but on Windows the editor defaults to CRLF for new files,
+  // and `scalafmtCheckAll` reads the working tree: a freshly created .scala
+  // file fails the check locally until something rewrites it as LF.
+  "files.eol": "\n",
+
   // ---------------------------------------------------------------------------
   // Tabs — a click opens a file, it does not audition it
   //
