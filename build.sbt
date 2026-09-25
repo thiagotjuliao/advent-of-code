@@ -6,12 +6,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "advent-of-code",
-    scalacOptions ++= Seq(
-      "-deprecation",
-      "-feature",
-      "-unchecked",
-      "-Wunused:imports"
-    ),
+    scalacOptions ++= CompilerFlags.base,
     libraryDependencies += "org.scalameta" %% "munit" % "1.3.6" % Test,
     testFrameworks += new TestFramework("munit.Framework"),
     Compile / mainClass := Some("aoc.Runner"),
