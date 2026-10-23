@@ -70,7 +70,11 @@ verify_staged_tree() {
     cd "$VERIFY_DIR" || exit 1
     # The sed drops sbt's own stack trace when `run check` exits nonzero: what
     # matters is the "failed: ..." line just above it.
-    sbt -batch "scalafmtCheckAll; test; run check $YEAR $DAY" 2>&1 \
+    #
+    # `--server` runs sbt in the foreground instead of through the thin client,
+    # which under sbt 2 starts a server in the background that outlives the
+    # script — an orphan left in the scratch directory, holding memory.
+    sbt --server -batch "scalafmtCheckAll; test; run check $YEAR $DAY" 2>&1 \
       | sed -e '/[[:space:]]at [A-Za-z_$][A-Za-z0-9_.$]*[.(]/d' \
             -e '/nonzero exit code returned from runner/d' \
             -e '/sbt server disconnected/d'

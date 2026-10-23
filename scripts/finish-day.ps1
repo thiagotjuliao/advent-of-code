@@ -75,7 +75,10 @@ function Test-StagedTree([string]$Dir, [int]$Year, [int]$Day) {
 
   Push-Location $Dir
   try {
-    & sbt -batch "scalafmtCheckAll; test; run check $Year $Day" 2>&1 |
+    # `--server` runs sbt in the foreground instead of through the thin client,
+    # which under sbt 2 starts a server in the background that outlives the
+    # script — an orphan left in the scratch directory, holding memory.
+    & sbt --server -batch "scalafmtCheckAll; test; run check $Year $Day" 2>&1 |
       ForEach-Object { [string]$_ } |
       Where-Object { $_ -notmatch $noise } |
       ForEach-Object { Write-Host $_ }
