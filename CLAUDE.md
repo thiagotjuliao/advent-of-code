@@ -14,12 +14,12 @@ file wins.
 
 | command | |
 | --- | --- |
-| `sbt testFull` | every suite — the gate |
+| `sbt verify` | formatting and every suite — the gate, and what CI runs |
 | `sbt "run 2015 1"` | one day; `sbt "run list"` shows what is implemented |
 | `./scripts/new-day.sh 2024 7` | scaffold a day: solution, suite and input |
 
-`testFull`, not `test`: under sbt 2 `test` is incremental and its greenest
-possible run is the one that ran nothing.
+`verify` runs `testFull`, not `test`: under sbt 2 `test` is incremental and its
+greenest possible run is the one that ran nothing.
 
 ## This project
 
