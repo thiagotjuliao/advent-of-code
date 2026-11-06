@@ -29,3 +29,20 @@ possible run is the one that ran nothing.
 - Each part prints its wall-clock time and the bytes it allocated. The bytes
   are exact and repeat run to run, so they are the signal that a solution has
   to stop being brute force.
+
+## Reviewing solutions
+
+The solutions are the author's own; the point is to get better at solving
+these problems. When a solution is finished or shown for review, assess it
+candidly:
+
+- **Say whether it was the best approach**, and if not, name the better one
+  and why: the algorithm or data structure, its complexity against the
+  solution's, and what about the puzzle makes it fit. If the solution is
+  already the right one, say so and stop; do not invent an improvement.
+- **Back it with measurements.** Run the day and use the time and bytes it
+  prints; a claim that an alternative is faster or lighter is measured or
+  labelled as an estimate.
+- **Rank the tips**, what would have made the solution more viable first:
+  approach, then idiomatic Scala, then style.
+- **Describe, do not apply.** Leave the code as it is unless asked to change it.
